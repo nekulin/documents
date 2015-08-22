@@ -63,4 +63,9 @@ class Attachments extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Documents::className(), ['id' => 'document_id']);
     }
+
+    public function afterDelete()
+    {
+        /** @todo delete file */
+    }
 }

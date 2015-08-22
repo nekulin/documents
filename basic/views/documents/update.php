@@ -18,4 +18,6 @@ $this->params['breadcrumbs'][] = 'Изменение';
         'model' => $model,
     ]) ?>
 
+    <?= $this->render('_files', ['model' => $model]) ?>
+
 </div>

@@ -107,7 +107,7 @@ class AttachmentsController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
         $model->delete();
-
+        /** @todo redirect HTTP_REFERER */
         return $this->redirect(['/documents/view', 'id' => $model->document_id]);
     }
 

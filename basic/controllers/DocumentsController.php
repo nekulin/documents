@@ -99,8 +99,13 @@ class DocumentsController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
+        $model = $this->findModel($id);
+        $transaction = $model->getDb()->beginTransaction();
+        if ($model->delete()) {
+            $transaction->commit();
+        } else {
+            $transaction->rollBack();
+        }
         return $this->redirect(['index']);
     }
     public function actionUpload($id)

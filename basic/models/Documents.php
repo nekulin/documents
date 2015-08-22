@@ -58,4 +58,16 @@ class Documents extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Attachments::className(), ['document_id' => 'id']);
     }
+
+    public function beforeDelete()
+    {
+        // Удалим все файлы
+        foreach ($this->attachments as $attachment) {
+            if (!$attachment->delete()) {
+                $this->addError('id', 'Не удалось удалить файл');
+                return false;
+            }
+        }
+        return true;
+    }
 }
