@@ -26,6 +26,7 @@ $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $model);
                 return Html::a($data->name, $data->getLink(), ['target' => '_blank', 'data-pjax' => '0']);
             },
         ],
+        'created',
         [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{delete}',

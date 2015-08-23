@@ -13,6 +13,7 @@ use Yii;
  * @property string $name
  * @property integer $size
  * @property string $ext
+ * @property string $created
  *
  * @property Documents $document
  */
