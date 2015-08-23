@@ -62,13 +62,42 @@ class DocumentsController extends Controller
     public function actionCreate()
     {
         $model = new Documents();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
+        $transaction = $model->getDb()->beginTransaction();
+        try {
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                // сохраним файлы
+                $session = Yii::$app->session;
+                $files_temp = $session->get('files_temp', []);
+                $upload_path_temp = \Yii::getAlias('@documents_dir_files_temp');
+                $upload_path = \Yii::getAlias('@document_files_dir');
+                foreach ($files_temp as $file) {
+                    $file_path = $upload_path_temp . '/' . md5($file['hash']) . '.' . $file['ext'];
+                    if (!file_exists($file_path)) continue;
+                    $attachment = new Attachments();
+                    $attachment->document_id = $model->id;
+                    $attachment->name = $file['name'];
+                    $attachment->hash = $file['hash'];
+                    $attachment->size = $file['size'];
+                    $attachment->ext = $file['ext'];
+                    $attachment->save();
+                    copy(
+                        $upload_path_temp . '/' . md5($file['hash']) . '.' . $file['ext'],
+                        $upload_path . '/' . md5($file['hash']) . '.' . $file['ext']
+                    );
+                    unlink($upload_path_temp . '/' . md5($file['hash']) . '.' . $file['ext']);
+                }
+                $session->remove('files_temp');
+                $transaction->commit();
+                return $this->redirect(['view', 'id' => $model->id]);
+            } else {
+                $transaction->rollBack();
+                return $this->render('create', [
+                    'model' => $model,
+                ]);
+            }
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+            $transaction->rollBack();
         }
     }
 
@@ -108,11 +137,18 @@ class DocumentsController extends Controller
         }
         return $this->redirect(['index']);
     }
+
+    /**
+     * Загрузка файлов для документов
+     * @param $id
+     * @return bool
+     * @throws NotFoundHttpException
+     */
     public function actionUpload($id)
     {
         $model = $this->findModel($id);
         $fileName = 'file';
-        $uploadPath = \Yii::getAlias('@documents_dir');
+        $uploadPath = \Yii::getAlias('@document_files_dir');
         if (isset($_FILES[$fileName])) {
             $file = \yii\web\UploadedFile::getInstanceByName($fileName);
             $hash = md5_file($file->tempName);
@@ -127,6 +163,33 @@ class DocumentsController extends Controller
                     Yii::$app->response->statusCode = 400;
                     echo array_values($attachment->getFirstErrors())[0];
                 }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Временная загрузка файлов для создаваемого документа
+     * @return bool
+     */
+    public function actionUploadTemp()
+    {
+        $fileName = 'file';
+        $uploadPath = \Yii::getAlias('@documents_dir_files_temp');
+        if (isset($_FILES[$fileName])) {
+            $file = \yii\web\UploadedFile::getInstanceByName($fileName);
+            $hash = md5_file($file->tempName);
+            if ($file->saveAs($uploadPath . '/' . md5($hash) . '.' . $file->extension)) {
+                $session = Yii::$app->session;
+                $files_temp = $session->get('files_temp', []);
+                $files_temp[] = [
+                    'name' => $file->baseName,
+                    'hash' => $hash,
+                    'md5' => md5($hash),
+                    'size' => $file->size,
+                    'ext' => $file->extension,
+                ];
+                $session->set('files_temp', $files_temp);
             }
         }
         return false;

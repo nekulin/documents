@@ -9,7 +9,8 @@ $config = [
     'language' => 'ru-RU',
     'sourceLanguage' => 'ru-RU',
     'aliases' => [
-        '@documents_dir' => '@app/web/files/',
+        '@document_files_dir' => '@app/web/files/',
+        '@documents_dir_files_temp' => '@app/data/files_temp/',
     ],
     'components' => [
         'urlManager' => [

@@ -16,6 +16,20 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'text')->textarea(['rows' => 6]) ?>
 
+    <?php if ($model->isNewRecord) { ?>
+        <div class="form-group">
+            <?= \kato\DropZone::widget([
+                'uploadUrl' => \yii\helpers\Url::to(['/documents/upload-temp', 'id' => $model->id]),
+                'options' => [
+                    'maxFilesize' => '2',
+                ],
+                'clientEvents' => [
+                    'queuecomplete' => (!$model->isNewRecord) ? "function(file){ $.pjax.reload({container:'#attachment-grid'}); }" : 'function(file){}',
+                ],
+            ]); ?>
+        </div>
+    <?php } ?>
+
     <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? 'Создать' : 'Изменить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
     </div>

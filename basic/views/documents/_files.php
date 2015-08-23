@@ -8,7 +8,8 @@ use yii\helpers\Html;
 /* @var $model app\models\Documents */
 
 $searchModel = new SearchAttachments();
-$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+$searchModel->document_id = $model->id;
+$dataProvider = $searchModel->search(Yii::$app->request->queryParams, $model);
 ?>
 <h1>Файлы</h1>
 
@@ -18,7 +19,13 @@ $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'columns' => [
-        'name',
+        [
+            'attribute' => 'name',
+            'format' => 'raw',
+            'value' => function(app\models\Attachments $data) {
+                return Html::a($data->name, $data->getLink(), ['target' => '_blank', 'data-pjax' => '0']);
+            },
+        ],
         [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{delete}',

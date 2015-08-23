@@ -42,7 +42,6 @@ class SearchAttachments extends Attachments
     public function search($params)
     {
         $query = Attachments::find();
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
@@ -56,7 +55,6 @@ class SearchAttachments extends Attachments
         }
 
         $query->andFilterWhere([
-            'id' => $this->id,
             'document_id' => $this->document_id,
             'size' => $this->size,
         ]);

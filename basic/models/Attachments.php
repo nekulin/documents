@@ -68,4 +68,9 @@ class Attachments extends \yii\db\ActiveRecord
     {
         /** @todo delete file */
     }
+
+    public function getLink()
+    {
+        return '/files/' . md5($this->hash) . '.' . $this->ext;
+    }
 }
