@@ -54,6 +54,7 @@ class Attachments extends \yii\db\ActiveRecord
             'name' => 'Оригинальное название',
             'size' => 'Размер',
             'ext' => 'Расширение',
+            'created' => 'Время добавления',
         ];
     }
 
